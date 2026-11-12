@@ -1,0 +1,8 @@
+# One-click hosting on render.com: New > Blueprint > pick this repository.
+services:
+  - type: web
+    name: ridge-riot
+    runtime: python
+    plan: free
+    buildCommand: "true"
+    startCommand: python3 server.py
