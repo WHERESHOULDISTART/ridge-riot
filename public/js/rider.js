@@ -178,7 +178,7 @@ export class Rider {
     this.grad = 0; this.gpitch = 0; this.steerSm = 0; this.tumble = 0; this.off = 0; this.landK = 0; this.standK = 0;
     for (const k of TIMERS) this[k] = 0;
     this.crashT = 0; this.kickSide = 0;
-    this.nitro = 0.3; this.item = null; this.ammo = 0; this.pendingItem = null; this.rouletteT = 0;
+    this.nitro = 0.3; this.nitroLock = 0; this.item = null; this.ammo = 0; this.pendingItem = null; this.rouletteT = 0;
     this.score = 0; this.finished = false; this.finishTime = null; this.place = 1;
     this.inp = blankInput(); this.ai = { lane: (Math.random() - 0.5) * Math.min(5, this.T.trailW), itemT: 0, plan: null, wob: Math.random() * 9 };
     this.net = null; this.accelVis = false;
@@ -203,11 +203,20 @@ export class Rider {
     if (this.crashT > 0) return this._crashUpdate(dt);
     this.accelVis = inp.accel;
     // boost bar: trickles up on its own, fills fast in the air, burns while the boost button is held
-    this.nitro = Math.min(1, this.nitro + dt * (0.018 + (!this.grounded && this.airT > 0.2 ? 0.11 : 0)));
     // un-stick: pedalling but going nowhere for 3 s puts you back on the trail
     this.stuckT = inp.accel && this.v < 2.5 && !this.finished ? (this.stuckT || 0) + dt : 0;
     if (this.stuckT > 3) { this.stuckT = 0; this.s = Math.min(this.s + 4, T.length - 10); this.u = T.trailAt(this.s); this.y = T.heightAt(this.s, this.u); this.psi = T.phiAt(this.s); this.v = 9; this.vy = 0; this.grounded = true; this.invT = 1.5; }
-    if (inp.boost && this.nitro > 0 && this.stunT <= 0) { if (this.boostT <= 0) g.sfx('pad', this); this.nitro = Math.max(0, this.nitro - dt * 0.38); this.boostT = Math.max(this.boostT, 0.14); }
+    // Boost bar. Burning it to zero locks it for 2.5 s: nothing refills it and the button does nothing.
+    // Otherwise it trickles up on its own and fills faster in the air (tricks and hits add chunks elsewhere).
+    // A burn can only start with at least 10% in the bar; once started it runs until released or empty.
+    if (!inp.boost) this.burning = false;
+    if (this.nitroLock > 0) { this.nitroLock -= dt; this.nitro = 0; this.burning = false; }
+    else if (inp.boost && this.stunT <= 0 && (this.burning || this.nitro >= 0.1)) {
+      if (!this.burning) g.sfx('pad', this);
+      this.burning = true;
+      this.nitro -= dt * 0.38; this.boostT = Math.max(this.boostT, 0.14);
+      if (this.nitro <= 0) { this.nitro = 0; this.nitroLock = 2.5; this.burning = false; }
+    } else this.nitro = Math.min(1, this.nitro + dt * (0.018 + (!this.grounded && this.airT > 0.2 ? 0.11 : 0)));
 
     const phi = T.phiAt(this.s);
     let th = phi - this.psi;

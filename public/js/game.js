@@ -514,6 +514,7 @@ export class Game {
       set('score', r.score, (v) => (h.score.textContent = v));
       set('boost', Math.round(clamp(r.nitro, 0, 1) * 50), (v) => { h.boost.style.width = v * 2 + '%'; h.boost.parentElement.classList.toggle('full', v >= 49); });
       set('burn', r.boostT > 0, (v) => h.boost.parentElement.classList.toggle('burn', v));
+      set('lock', r.nitroLock > 0, (v) => { h.boost.parentElement.classList.toggle('lock', v); h.boost.nextElementSibling.textContent = v ? 'EMPTY - RECHARGING' : 'BOOST'; });
       let icon = '', name = '';
       if (r.rouletteT > 0) { icon = ITEMS[ITEM_KEYS[Math.floor(this.time * 14) % ITEM_KEYS.length]].icon; name = '???'; if (this.tickT <= 0) tick = true; }
       else if (r.item) { icon = ITEMS[r.item].icon; name = r.item === 'snowball' ? 'SNOWBALLS x' + (r.ammo || 3) : ITEMS[r.item].name; }

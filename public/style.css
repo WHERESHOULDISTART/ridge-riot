@@ -175,3 +175,5 @@ input[type=range] { padding: 0; height: 22px; outline: none; border: 0; backgrou
 .h-boost { position: relative; height: calc(20px * var(--k)); width: calc(240px * var(--k)); }
 .h-boost em { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: calc(13px * var(--k)); letter-spacing: 2px; color: #fff; text-shadow: 1px 1px 0 #000; }
 .h-boost.full { box-shadow: 0 0 14px 3px rgba(255, 210, 30, 0.9); } .h-boost.burn i { background: linear-gradient(90deg, #fff, #ffe23e, #ff7a00); }
+
+.h-boost.lock { outline: 2px solid #e0281e; animation: glow 0.4s infinite alternate; } .h-boost.lock em { color: #ff6a5a; }
